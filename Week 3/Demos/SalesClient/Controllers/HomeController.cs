@@ -37,16 +37,16 @@ namespace SalesClient.Controllers
 
 			// If we don't have the discovery client and a code, then we know the user has not authenticated
 			// Redirect the user to the authentication page
-			//if (disco == null && code == null) {
-			//	Uri redirectUri = authContext.GetAuthorizationRequestURL(
-			//		discoResource, // Where the discovery service is
-			//		creds.ClientId, // This identifies the application
-			//		new Uri(Request.Url.AbsoluteUri.Split('?')[0]), // Redirect URL
-			//		UserIdentifier.AnyUser,
-			//		string.Empty);
+			if (disco == null && code == null) {
+				Uri redirectUri = authContext.GetAuthorizationRequestURL(
+					discoResource, // Where the discovery service is
+					creds.ClientId, // This identifies the application
+					new Uri(Request.Url.AbsoluteUri.Split('?')[0]), // Redirect URL
+					UserIdentifier.AnyUser,
+					string.Empty);
 
-			//	return Redirect(redirectUri.ToString()); // Redirect to the login page
-			//}
+				return Redirect(redirectUri.ToString()); // Redirect to the login page
+			}
 
 			if(code == null) code = await FilesRepository.GetAccessToken();
 
@@ -153,5 +153,197 @@ namespace SalesClient.Controllers
 			//Show the contacts
 			return View(contacts);
 		}
+
+		[HttpGet()]
+		public ActionResult SendEmail(String code)
+		{
+			AuthenticationContext authContext = new AuthenticationContext(
+				ConfigurationManager.AppSettings["ida:AuthorizationUri"] + "/common",
+				true);
+
+			ClientCredential creds = new ClientCredential(
+				ConfigurationManager.AppSettings["ida:ClientID"],
+				ConfigurationManager.AppSettings["ida:Password"]);
+
+			//Get the discovery information that was saved earlier
+			CapabilityDiscoveryResult cdr = Helpers.GetFromCache("ContactsDiscoveryResult") as CapabilityDiscoveryResult;
+
+			//Get a client, if this page was already visited
+			// This is the client that will give us access to all of the "Outlook" information
+			OutlookServicesClient outlookClient = Helpers.GetFromCache("OutlookClient") as OutlookServicesClient;
+
+			//Get an authorization code if needed
+			if (outlookClient == null && cdr != null && code == null) {
+				Uri redirectUri = authContext.GetAuthorizationRequestURL(
+					cdr.ServiceResourceId,
+					creds.ClientId,
+					new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+					UserIdentifier.AnyUser,
+					string.Empty);
+
+				return Redirect(redirectUri.ToString());
+			}
+
+			return View();
+		}
+		
+		[HttpPost()]
+		public async Task<ActionResult> SendEmail(String code, String toAddress, String body)
+		{
+			AuthenticationContext authContext = new AuthenticationContext(
+							 ConfigurationManager.AppSettings["ida:AuthorizationUri"] + "/common",
+							 true);
+
+			ClientCredential creds = new ClientCredential(
+				ConfigurationManager.AppSettings["ida:ClientID"],
+				ConfigurationManager.AppSettings["ida:Password"]);
+
+			//Get the discovery information that was saved earlier
+			CapabilityDiscoveryResult cdr = Helpers.GetFromCache("ContactsDiscoveryResult") as CapabilityDiscoveryResult;
+
+			//Get a client, if this page was already visited
+			// This is the client that will give us access to all of the "Outlook" information
+			OutlookServicesClient outlookClient = Helpers.GetFromCache("OutlookClient") as OutlookServicesClient;
+
+			//Get an authorization code if needed
+			if (outlookClient == null && cdr != null && code == null) {
+				Uri redirectUri = authContext.GetAuthorizationRequestURL(
+					cdr.ServiceResourceId,
+					creds.ClientId,
+					new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+					UserIdentifier.AnyUser,
+					string.Empty);
+
+				return Redirect(redirectUri.ToString());
+			}
+
+			//Create the OutlookServicesClient
+			if (outlookClient == null && cdr != null && code != null) {
+				outlookClient = new OutlookServicesClient(cdr.ServiceEndpointUri, async () => {
+					var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(
+						code,
+						new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+						creds);
+					return authResult.AccessToken;
+				});
+
+				Helpers.SaveInCache("OutlookClient", outlookClient);
+			}
+
+			Recipient recipient = new Recipient();
+			recipient.EmailAddress = new EmailAddress() { Address = toAddress};
+
+			List<Recipient> toRecipients = new List<Recipient>();
+			toRecipients.Add(recipient);
+
+			ItemBody itemBody = new ItemBody() { Content = body };
+
+			Message message = new Message() {
+				ToRecipients = toRecipients,
+				Body = itemBody
+			};
+
+			await outlookClient.Me.SendMailAsync(message, true);
+
+			ViewBag.Message = "Message Sent!!";
+			return View();
+		}
+
+		[HttpGet()]
+		public ActionResult CreateAppointment(String code)
+		{
+			AuthenticationContext authContext = new AuthenticationContext(
+				ConfigurationManager.AppSettings["ida:AuthorizationUri"] + "/common",
+				true);
+
+			ClientCredential creds = new ClientCredential(
+				ConfigurationManager.AppSettings["ida:ClientID"],
+				ConfigurationManager.AppSettings["ida:Password"]);
+
+			//Get the discovery information that was saved earlier
+			CapabilityDiscoveryResult cdr = Helpers.GetFromCache("ContactsDiscoveryResult") as CapabilityDiscoveryResult;
+
+			//Get a client, if this page was already visited
+			// This is the client that will give us access to all of the "Outlook" information
+			OutlookServicesClient outlookClient = Helpers.GetFromCache("OutlookClient") as OutlookServicesClient;
+
+			//Get an authorization code if needed
+			if (outlookClient == null && cdr != null && code == null) {
+				Uri redirectUri = authContext.GetAuthorizationRequestURL(
+					cdr.ServiceResourceId,
+					creds.ClientId,
+					new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+					UserIdentifier.AnyUser,
+					string.Empty);
+
+				return Redirect(redirectUri.ToString());
+			}
+
+			return View();
+		}
+
+		[HttpPost()]
+		public async Task<ActionResult> CreateAppointment(String code, String toAddress, String body)
+		{
+			AuthenticationContext authContext = new AuthenticationContext(
+							 ConfigurationManager.AppSettings["ida:AuthorizationUri"] + "/common",
+							 true);
+
+			ClientCredential creds = new ClientCredential(
+				ConfigurationManager.AppSettings["ida:ClientID"],
+				ConfigurationManager.AppSettings["ida:Password"]);
+
+			//Get the discovery information that was saved earlier
+			CapabilityDiscoveryResult cdr = Helpers.GetFromCache("ContactsDiscoveryResult") as CapabilityDiscoveryResult;
+
+			//Get a client, if this page was already visited
+			// This is the client that will give us access to all of the "Outlook" information
+			OutlookServicesClient outlookClient = Helpers.GetFromCache("OutlookClient") as OutlookServicesClient;
+
+			//Get an authorization code if needed
+			if (outlookClient == null && cdr != null && code == null) {
+				Uri redirectUri = authContext.GetAuthorizationRequestURL(
+					cdr.ServiceResourceId,
+					creds.ClientId,
+					new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+					UserIdentifier.AnyUser,
+					string.Empty);
+
+				return Redirect(redirectUri.ToString());
+			}
+
+			//Create the OutlookServicesClient
+			if (outlookClient == null && cdr != null && code != null) {
+				outlookClient = new OutlookServicesClient(cdr.ServiceEndpointUri, async () => {
+					var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(
+						code,
+						new Uri(Request.Url.AbsoluteUri.Split('?')[0]),
+						creds);
+					return authResult.AccessToken;
+				});
+
+				Helpers.SaveInCache("OutlookClient", outlookClient);
+			}
+
+			Event appointment = new Event();
+			
+			List<Attendee> attendees = new List<Attendee>();
+			attendees.Add(new Attendee() { 
+								EmailAddress = new EmailAddress() { Address = toAddress},
+								Type = AttendeeType.Required
+			});
+			appointment.Attendees = attendees;
+
+			appointment.Body = new ItemBody() { Content = body };
+
+			appointment.Start = new DateTimeOffset(DateTime.Now.AddHours(1));
+			appointment.End = new DateTimeOffset(DateTime.Now.AddHours(2));
+
+			await outlookClient.Me.Calendar.Events.AddEventAsync(appointment);
+
+			ViewBag.Message = "Appointment Created!!";
+			return View();
+		}
+
 	}
 }

@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Create Appointment";
+}
+
+@if (!String.IsNullOrEmpty(ViewBag.Message)) {
+	<h2>@ViewBag.Message</h2>
+}
+
+<h2>Create Appointment</h2>
+
+@using (Html.BeginForm()) {
+	<div class="form-group">
+		<label class="col-md-3" for="toAddress">Address:</label>
+		<div class="col-md-9">
+			<input type="email" name="toAddress" value="" class="form-control" />
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-md-3" for="body">Body:</label>
+		<div class="col-md-9">
+			<input type="text" name="body" value="" class="form-control" />
+		</div>
+	</div>
+	<div>
+		<button type="submit" class="btn btn-success">Send Mail</button>
+	</div>
+}
+
