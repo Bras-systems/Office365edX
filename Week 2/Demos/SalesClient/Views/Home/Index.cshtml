@@ -1,0 +1,42 @@
+﻿@model IEnumerable<SalesClient.Models.ViewDiscovery>
+
+@{
+    ViewBag.Title = "Office 365 Services";
+}
+
+<h2>Office 365 Services</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Capability)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EndpointUri)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ResourceId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Version)
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Capability)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EndpointUri)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ResourceId)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Version)
+        </td>
+    </tr>
+}
+
+</table>
