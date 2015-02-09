@@ -7,16 +7,16 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{60F112CE-E8FC-4C87-AD56-3847370CF3BB}</ProjectGuid>
+    <ProjectGuid>{07CABABA-9F07-42C5-B728-9BEBA54F0DB1}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SalesClient</RootNamespace>
-    <AssemblyName>SalesClient</AssemblyName>
+    <RootNamespace>SalesManager</RootNamespace>
+    <AssemblyName>SalesManager</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort>44302</IISExpressSSLPort>
+    <IISExpressSSLPort>44303</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -67,9 +67,6 @@
     </Reference>
     <Reference Include="Microsoft.Office365.OutlookServices">
       <HintPath>..\packages\Microsoft.Office365.OutlookServices.1.0.22\lib\net40\Microsoft.Office365.OutlookServices.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Office365.SharePoint">
-      <HintPath>..\packages\Microsoft.Office365.SharePoint.1.0.22\lib\net40\Microsoft.Office365.SharePoint.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Spatial">
       <HintPath>..\packages\Microsoft.Spatial.6.8.1\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
@@ -165,17 +162,19 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ContactsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Filters\TokenFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\ViewContact.cs" />
-    <Compile Include="Models\ViewDiscovery.cs" />
     <Compile Include="Models\TenantDbContext.cs" />
     <Compile Include="Models\TenantRegistrationModels.cs" />
+    <Compile Include="Models\ViewContact.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\DatabaseIssuerNameRegistry.cs" />
-    <Compile Include="Utils\Helpers.cs" />
+    <Compile Include="Utils\ServicesHelper.cs" />
+    <Compile Include="Utils\SettingsHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
@@ -215,10 +214,10 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Account\SignOutCallback.cshtml" />
+    <Content Include="Views\Contacts\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Filters\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -243,9 +242,9 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>64752</DevelopmentServerPort>
+          <DevelopmentServerPort>56229</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44302/</IISUrl>
+          <IISUrl>https://localhost:44303/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
