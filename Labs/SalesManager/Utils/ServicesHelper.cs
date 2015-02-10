@@ -22,6 +22,7 @@ namespace SalesManager.Utils
 		readonly HttpSessionStateBase session = null;
 		readonly HttpRequestBase request = null;
 		readonly String code = null;
+		Uri redirectUri;
 
 		public ServicesHelper(HttpContextBase httpContext)
 		{
@@ -33,7 +34,10 @@ namespace SalesManager.Utils
 
 		public async Task<OutlookServicesClient> LoadOutlookServicesClient()
 		{
-			if(String.IsNullOrEmpty(code)) return null;
+			if (String.IsNullOrEmpty(code)) {
+				CreateDiscoveryAuthorizationUri();
+				return null;
+			}
 
 			var discoveryClient = LoadDiscoveryClient();
 			var contactsDiscoveryResult =
@@ -41,9 +45,9 @@ namespace SalesManager.Utils
 			return LoadOutlookServicesClient(contactsDiscoveryResult);
 		}
 
-		public ActionResult RedirectToAuthentication()
+		private void CreateDiscoveryAuthorizationUri()
 		{
-			Uri redirectUri =
+			redirectUri =
 				SettingsHelper.AuthenticationContext.GetAuthorizationRequestURL(
 					discoResource, // Where the discovery service is
 					SettingsHelper.ClientCredential.ClientId, // This identifies the application
@@ -51,11 +55,14 @@ namespace SalesManager.Utils
 					UserIdentifier.AnyUser,
 					string.Empty
 				);
+		}
 
+		public ActionResult RedirectToAuthentication()
+		{
 			return new RedirectResult(redirectUri.ToString());
 		}
 
-		private DiscoveryClient LoadDiscoveryClient()
+		public DiscoveryClient LoadDiscoveryClient()
 		{
 			DiscoveryClient discoveryClient = session["DiscoveryClient"] as DiscoveryClient;
 
@@ -77,7 +84,7 @@ namespace SalesManager.Utils
 			return discoveryClient;
 		}
 
-		private async Task<CapabilityDiscoveryResult> LoadContactsDiscoveryResultAsync(DiscoveryClient discoveryClient)
+		public async Task<CapabilityDiscoveryResult> LoadContactsDiscoveryResultAsync(DiscoveryClient discoveryClient)
 		{
 			var contactsDiscoveryResult = session["ContactsDiscoveryResult"] as CapabilityDiscoveryResult;
 
@@ -89,21 +96,36 @@ namespace SalesManager.Utils
 			return contactsDiscoveryResult;
 		}
 
-		private OutlookServicesClient LoadOutlookServicesClient(CapabilityDiscoveryResult contactsDiscoveryResult)
+		public OutlookServicesClient LoadOutlookServicesClient(CapabilityDiscoveryResult contactsDiscoveryResult)
 		{
 			var outlookServicesClient = session["OutlookServicesClient"] as OutlookServicesClient;
 			if (outlookServicesClient == null) {
-				outlookServicesClient = new OutlookServicesClient(contactsDiscoveryResult.ServiceEndpointUri, async () => {
-					var authResult = await authenticationContext.AcquireTokenByAuthorizationCodeAsync(
-						code,
-						new Uri(request.Url.AbsoluteUri.Split('?')[0]),
-						clientCredential);
-					return authResult.AccessToken;
-				});
-				session["OutlookServicesClient"] = outlookServicesClient;
+				if (session["CreatedOutlookClientCode"] == null) {
+					CreateOutlookAuthorizationUri(contactsDiscoveryResult);
+					session["CreatedOutlookClientCode"] = true;
+				} else {
+					outlookServicesClient = new OutlookServicesClient(contactsDiscoveryResult.ServiceEndpointUri, async () => {
+						var authResult = await authenticationContext.AcquireTokenByAuthorizationCodeAsync(
+							code,
+							new Uri(request.Url.AbsoluteUri.Split('?')[0]),
+							clientCredential);
+						return authResult.AccessToken;
+					});
+					session["OutlookServicesClient"] = outlookServicesClient;
+				}
 			}
 
 			return outlookServicesClient;
+		}
+
+		private void CreateOutlookAuthorizationUri(CapabilityDiscoveryResult contactsDiscoveryResult)
+		{
+			redirectUri = authenticationContext.GetAuthorizationRequestURL(
+					contactsDiscoveryResult.ServiceResourceId,
+					clientCredential.ClientId,
+					new Uri(request.Url.AbsoluteUri.Split('?')[0]),
+					UserIdentifier.AnyUser,
+					string.Empty);
 		}
 	}
 }

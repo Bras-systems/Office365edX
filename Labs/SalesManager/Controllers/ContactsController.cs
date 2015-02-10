@@ -7,7 +7,6 @@ using System.Web.Mvc;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Office365.Discovery;
 using Microsoft.Office365.OutlookServices;
-using SalesManager.Filters;
 using SalesManager.Models;
 using SalesManager.Utils;
 
@@ -30,11 +29,11 @@ namespace SalesManager.Controllers
 					Id = contact.Id,
 					GivenName = contact.GivenName,
 					Surname = contact.Surname,
-					DisplayName = contact.Surname + ", " + contact.GivenName,
-					CompanyName = contact.CompanyName,
-					EmailAddress = contact.EmailAddresses.FirstOrDefault().Address,
-					BusinessPhone = contact.BusinessPhones.FirstOrDefault(),
-					HomePhone = contact.HomePhones.FirstOrDefault()
+					//DisplayName = contact.Surname + ", " + contact.GivenName,
+					//CompanyName = contact.CompanyName,
+					//EmailAddress = contact.EmailAddresses.FirstOrDefault().Address,
+					//BusinessPhone = contact.BusinessPhones.FirstOrDefault(),
+					//HomePhone = contact.HomePhones.FirstOrDefault()
 				});
 			}
 
