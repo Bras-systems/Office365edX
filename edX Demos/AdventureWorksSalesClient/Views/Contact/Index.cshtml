@@ -1,0 +1,53 @@
+﻿@model IEnumerable<AdventureWorksSalesClient.Models.ViewContact>
+
+@{
+    ViewBag.Title = "Contacts";
+}
+
+<h2>Contacts</h2>
+
+@if (TempData["DisplayName"] != null) {
+	<h3>Created @TempData["DisplayName"]</h3>
+}
+@if (TempData["MessageEmail"] != null) {
+	<h3>Sent mail to @TempData["MessageEmail"]</h3>
+}
+@if (TempData["AppointmentEmail"] != null) {
+	<h3>Sent mail to @TempData["AppointmentEmail"]</h3>
+}
+<p>
+    @Html.ActionLink("Create New", "Create", new {code = ViewBag.Code})
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.GivenName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Surname)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DisplayName)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.GivenName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Surname)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DisplayName)
+        </td>
+        <td>
+			@Html.ActionLink("Send Mail", "SendMessage", "Mail", new { email = item.Email }, null) |
+			@Html.ActionLink("Schedule Appointment", "Create", "Appointment", new { email = item.Email }, null)
+        </td>
+    </tr>
+}
+
+</table>

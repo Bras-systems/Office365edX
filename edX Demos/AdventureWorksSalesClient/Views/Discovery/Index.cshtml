@@ -1,0 +1,30 @@
+﻿@model IEnumerable<SalesClient.Models.ViewDiscovery>
+
+@{
+    ViewBag.Title = "Capabilities";
+}
+
+<h2>Capabilities</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Capability)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EndpointUri)
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Capability)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EndpointUri)
+        </td>
+    </tr>
+}
+
+</table>
